@@ -160,7 +160,10 @@ const SideDrawer = () => {
                 <DrawerOverlay />
                 <DrawerContent>
                     <DrawerCloseButton />
-                    <DrawerHeader borderBottomWidth={'1px'}>Search Users here</DrawerHeader>
+                    <DrawerHeader borderBottomWidth={'1px'}>
+                        Search Users here....
+                        <span>okokook</span>
+                        </DrawerHeader>
 
                     <DrawerBody p={'10px'}>
                         <Input

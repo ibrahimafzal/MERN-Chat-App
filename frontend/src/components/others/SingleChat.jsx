@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { ChatState } from '../../context/ChatContext'
-import { Box, FormControl, IconButton, Input, InputGroup, Spinner, Text, useToast } from '@chakra-ui/react'
+import { Avatar, Box, FormControl, IconButton, Input, InputGroup, Spinner, Text, useToast } from '@chakra-ui/react'
 import WelcomePage from './WelcomePage'
 import { ArrowBackIcon, ArrowRightIcon } from "@chakra-ui/icons"
 import ProfileModal from "./ProfileModal"
@@ -9,7 +9,7 @@ import BG from "../../images/bg.jpg"
 import axios from 'axios'
 import '../styles.css'
 import ScrollableChat from './ScrollableChat'
-import { getSender, getSenderFull } from '../chatLogics/logics'
+import { getOtherUserImage, getSender, getSenderFull } from '../chatLogics/logics'
 import io from "socket.io-client"
 import notificationSound from "../../images/iphone_messages.mp3"
 
@@ -30,6 +30,10 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
 
     const { user, selectedChat, setSelectedChat, notification, setNotification } = ChatState()
     const toast = useToast()
+    console.log(user)
+    console.log('====================================');
+    console.log("selected Chat => ", selectedChat);
+    console.log('====================================');
 
     useEffect(() => {
         socket = io(ENDPOINT)
@@ -89,19 +93,19 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
 
     useEffect(() => {
         if (playRingtone) {
-          const audio = new Audio(notificationSound);
-          audio.play();
-    
-          // After playing the audio, set playRingtone back to false
-          audio.addEventListener('ended', () => {
-            setPlayRingtone(false);
-          });
-    
-          return () => {
-            audio.pause(); // Pause the audio when the component unmounts
-          };
+            const audio = new Audio(notificationSound);
+            audio.play();
+
+            // After playing the audio, set playRingtone back to false
+            audio.addEventListener('ended', () => {
+                setPlayRingtone(false);
+            });
+
+            return () => {
+                audio.pause(); // Pause the audio when the component unmounts
+            };
         }
-      }, [playRingtone]);
+    }, [playRingtone]);
 
     // Send a Message
     const PressEntersendMessage = async (event) => {
@@ -192,13 +196,14 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
         }, timerLength)
     }
 
+
     return (
         <>
             {
                 Object.keys(selectedChat).length > 0 ? (
                     <>
-                        <Text
-                            fontSize={{ base: '28px', md: "30px" }}
+                        <Box
+                            fontSize={"20px"}
                             py={2}
                             px={2}
                             w={'100%'}
@@ -209,35 +214,68 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                             bg='#179848'
                             color={'white'}
                         >
-                            <IconButton
-                                display={{ base: 'flex', md: 'none' }}
-                                bg={'none'}
-                                color={'white'}
-                                _hover={{ background: 'none' }}
-                                fontSize={'25px'}
-                                icon={<ArrowBackIcon />}
-                                onClick={() => setSelectedChat("")}
-                            />
+                            {/* 1 */}
+
 
                             {
                                 !selectedChat?.isGroupChat ? (
                                     <>
-                                        <div style={{ textTransform: 'capitalize', display: 'flex', flexDirection: "column", alignItems: 'center', fontSize: '20px', fontWeight: "500" }}>
-                                            {getSender(user?.data, selectedChat?.users)}
-                                            {isTyping ? (
-                                                <span>
-                                                    <span style={{ fontSize: "10px", display: "flex" }}>typing...</span>
-                                                </span>
-                                            ) : (<></>)
-                                            }
+                                        <div style={{ textTransform: 'capitalize', display: 'flex', alignItems: 'center', fontSize: '20px', fontWeight: "500" }}>
+                                            <IconButton
+                                                display={{ base: 'flex', md: 'none' }}
+                                                bg={'none'}
+                                                color={'white'}
+                                                _hover={{ background: 'none' }}
+                                                fontSize={'25px'}
+                                                icon={<ArrowBackIcon />}
+                                                onClick={() => setSelectedChat("")}
+                                            />
+                                            <Avatar
+                                                marginRight={"10px"}
+                                                size={'sm'}
+                                                src={getOtherUserImage(selectedChat, user?.data)}
+                                            />
+                                            <div style={{ display: "flex", flexDirection: "column" }}>
+
+                                                {getSender(user?.data, selectedChat?.users)}
+
+                                                {isTyping ? (
+                                                    <span>
+                                                        <span style={{ fontSize: "10px", display: "flex" }}>typing...</span>
+                                                    </span>
+                                                ) : (<></>)
+                                                }
+                                            </div>
                                         </div>
-                                        <ProfileModal user={getSenderFull(user?.data, selectedChat?.users)}/>
+
+                                        <ProfileModal user={getSenderFull(user?.data, selectedChat?.users)} />
                                     </>
                                 ) : (
                                     <>
-                                        <Box textTransform={'capitalize'} display={'flex'}>
-                                            {selectedChat?.chatName}
-
+                                        <Box textTransform={'capitalize'} display={'flex'} alignItems={"center"}>
+                                        <IconButton
+                                                display={{ base: 'flex', md: 'none' }}
+                                                bg={'none'}
+                                                color={'white'}
+                                                _hover={{ background: 'none' }}
+                                                fontSize={'25px'}
+                                                icon={<ArrowBackIcon />}
+                                                onClick={() => setSelectedChat("")}
+                                            />
+                                            <Avatar
+                                                marginRight={"10px"}
+                                                size={'sm'}
+                                                src={getOtherUserImage(selectedChat, user?.data)}
+                                            />
+                                            <div style={{ display: "flex", flexDirection: "column" }}>
+                                                {selectedChat?.chatName}
+                                                {isTyping ? (
+                                                    <span>
+                                                        <span style={{ fontSize: "10px", display: "flex" }}>typing...</span>
+                                                    </span>
+                                                ) : (<></>)
+                                            }
+                                            </div>
                                         </Box>
                                         <UpdateGroupChatModal
                                             fetchAgain={fetchAgain}
@@ -247,7 +285,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                                     </>
                                 )
                             }
-                        </Text>
+                        </Box>
 
                         <Box
                             display={'flex'}
@@ -275,7 +313,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                                     />
                                 ) : (
                                     <div className='messages'>
-                                        <ScrollableChat messages={messages} fetchMessages={fetchMessages}/>
+                                        <ScrollableChat messages={messages} fetchMessages={fetchMessages} />
                                     </div>
                                 )
                             }
